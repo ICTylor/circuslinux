@@ -53,12 +53,20 @@
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>
-#include <SDL.h>
-#include <SDL_image.h>
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #ifndef NOSOUND
-#include <SDL_mixer.h>
+#include <SDL2/SDL_mixer.h>
 #endif
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#endif
+
+#define DATA_PREFIX ""
+#define VERSION "1.0.0"
+#define DISABLE_MUSIC
 
 #ifdef LINUX
 #include <pwd.h>
@@ -413,6 +421,7 @@ void setup(void);
 void intro(void);
 int title(void);
 int game(void);
+void update_screen(void);
 void erase(int x, int y, int w, int h, int bkgd);
 void draw(int x, int y, int pict);
 void drawclown(int x, int y, int side,
@@ -459,20 +468,33 @@ int highscore[8];
 char highscorer[8][4];
 char username_initials[3];
 int mouse_grabbed;
+SDL_Window* window;
+SDL_Renderer* renderer;
 
 
 #ifndef NOSOUND
 Mix_Chunk * sounds[NUM_SOUNDS];
+#ifndef DISABLE_MUSIC
 Mix_Music * mus_title, * mus_game, * mus_gameover, * mus_hiscore,
   * mus_hiscreen;
+#endif
 #endif
 
 
 /* --- MAIN --- */
 
+void main_loop();
+
+#ifdef __EMSCRIPTEN__
+void emscripten_main_loop()
+{
+    main_loop();
+}
+#endif
+
 int main(int argc, char * argv[])
 {
-  int done, i;
+  int i;
   FILE * fi;
   char temp[512];
 
@@ -556,7 +578,7 @@ int main(int argc, char * argv[])
       else if (strcmp(argv[i], "--version") == 0 ||
 	       strcmp(argv[i], "-v") == 0)
 	{
-	  printf("Circus Linux! version " VERSION "\n");
+	  printf("Circus Linux! version %s\n", VERSION);
 	  
 	  exit(0);
 	}
@@ -648,23 +670,15 @@ int main(int argc, char * argv[])
   
   /* --- MAIN FUNCTION LOOP: --- */
   
-  done = 0;
   intro();
-  
-  do
-    {
-      show_highscores = 0;
-      done = title();
-      
-      if (!done)
-	{
-	  if (show_highscores == 0)
-	    done = game();
-	  else
-	    done = highscorescreen();
-	}
-    }
-  while (!done);
+
+#ifdef __EMSCRIPTEN__
+  emscripten_set_main_loop(emscripten_main_loop, 0, 1);
+#else
+  while (1) {
+    main_loop();
+  }
+#endif
   
   
   /* Save options: */
@@ -730,9 +744,9 @@ int game(void)
   int bouncers[2], barrier_x[3];
   SDL_Event event;
   Uint32 last_time, now_time;
-  SDLKey key;
+  SDL_Keycode key;
   SDL_Rect dest;
-  Uint8 * keystate;
+  // const Uint8 *keystate;
   Sint16 axis;
   
   
@@ -802,7 +816,8 @@ int game(void)
   else
     SDL_FillRect(screen, NULL, SDL_MapRGB(screen->format, 50, 50, 80));
   
-  SDL_Flip(screen);
+  SDL_UpdateWindowSurface(window);
+  SDL_UpdateWindowSurface(window);
   
   
   /* --- MAIN GAME LOOP --- */
@@ -917,7 +932,7 @@ int game(void)
 	{
 	  /* Handle digital controls: */
 	  
-	  keystate = SDL_GetKeyState(NULL);
+	  const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 	  
 	  axis = 0;
 #ifdef JOY_YES
@@ -990,12 +1005,12 @@ int game(void)
 		  
 		  if (mouse_grabbed == 0)
 		    {
-		      SDL_WM_GrabInput(SDL_GRAB_ON);
+		      SDL_SetWindowGrab(window, SDL_TRUE);
 		      mouse_grabbed = 1;
 		    }
 		  else
 		    {
-		      SDL_WM_GrabInput(SDL_GRAB_OFF);
+		      SDL_SetWindowGrab(window, SDL_FALSE);
 		      mouse_grabbed = 0;
 		    }
 		}
@@ -1011,7 +1026,7 @@ int game(void)
 	      else if (teeter_x > 512)
 		teeter_x = 512;
 	    }
-#ifdef JOY_YES
+#if defined(JOY_YES) && !defined(__EMSCRIPTEN__)
 	  else if (event.type == SDL_JOYAXISMOTION)
 	    {
 	      /* Joystick motion: */
@@ -1044,7 +1059,7 @@ int game(void)
 	    }
 #endif
 	  else if (event.type == SDL_MOUSEBUTTONDOWN
-#ifdef JOY_YES
+#if defined(JOY_YES) && !defined(__EMSCRIPTEN__)
 		   || event.type == SDL_JOYBUTTONDOWN
 #endif
 		   )
@@ -1527,7 +1542,7 @@ int game(void)
 		      player = 1 - player;
 		      erase(0, 0, 640, 480,
 			    IMG_BACKGROUND_0 + background_frame);
-		      SDL_Flip(screen);
+		      SDL_UpdateWindowSurface(window);
 		    }
 		}
 	      
@@ -1771,7 +1786,7 @@ int game(void)
       /* Update the screen: */
       
       if (use_low == 0 || (frame % 2))
-	SDL_UpdateRects(screen, num_rects, rects);
+	update_screen();
       
       
       /* Pause: */
@@ -1786,11 +1801,7 @@ int game(void)
 #ifndef NOSOUND
       if (use_sound == 1)
 	{
-	  if (!Mix_PlayingMusic())
-	    {
-	      Mix_PlayMusic(mus_game, 0);
-	      Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
-	    }
+	  /* Music playing is disabled due to incompatibility with Protracker mod format */
 	}
 #endif
     }
@@ -1800,7 +1811,7 @@ int game(void)
   /* Ungrab mouse: */
   
   if (mouse_grabbed == 1)
-    SDL_WM_GrabInput(SDL_GRAB_OFF);
+    SDL_SetWindowGrab(window, SDL_FALSE);
   
   
   /* Stop music and sounds: */
@@ -1821,7 +1832,7 @@ int game(void)
       /* Darken screen: */
       
       drawfuzz(0, 0, 640, 480);
-      SDL_Flip(screen);
+      SDL_UpdateWindowSurface(window);
       SDL_Delay(300);
       
       
@@ -1886,7 +1897,7 @@ int game(void)
       len = 0;
       
       
-      SDL_Flip(screen);
+      SDL_UpdateWindowSurface(window);
       
       done = 0;
       
@@ -1973,7 +1984,8 @@ int game(void)
 			      
 			      /* Update: */
 			      
-			      SDL_UpdateRect(screen, 272, 32, 96, 32);
+			      SDL_Rect updateRect = {272, 32, 96, 32};
+			      SDL_UpdateWindowSurfaceRects(window, &updateRect, 1);
 			    }
 			  else
 			    {
@@ -1996,7 +2008,7 @@ int game(void)
 			      
 			      /* Update: */
 			      
-			      SDL_UpdateRect(screen, 0, 32, 96, 32);
+			      SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){0, 32, 96, 32}, 1);
 			    }
 			}
 		      else
@@ -2019,7 +2031,7 @@ int game(void)
 			  
 			  /* Update: */
 			  
-			  SDL_UpdateRect(screen, 544, 32, 96, 32);
+			  SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){544, 32, 96, 32}, 1);
 			}
 		    }
 		}
@@ -2036,7 +2048,7 @@ int game(void)
 	  /* Draw sad clown: */
 	  
 	  draw(512, 320, IMG_SADCLOWN_0 + (frame / 5) % 3);
-	  SDL_UpdateRect(screen, 512, 320, 128, 160);
+	  SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){512, 320, 128, 160}, 1);
 	  
 	  
 	  /* Play game-over or high-score music: */
@@ -2047,9 +2059,14 @@ int game(void)
 	      if (!Mix_PlayingMusic())
 		{
 		  if (has_highscore == -1)
-		    Mix_PlayMusic(mus_gameover, 0);
+		    {
+		      // Music playing is disabled
+		      // Mix_PlayMusic(mus_gameover, 0);
+		    }
 		  else
-		    Mix_PlayMusic(mus_hiscore, 0);
+		    {
+		      // Mix_PlayMusic(mus_hiscore, 0);
+		    }
 		  
 		  Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
 		}
@@ -2098,12 +2115,12 @@ void intro(void)
       if (i == 5)
 	{
 	  drawtext(32, 176, "NEW BREED SOFTWARE");
-	  SDL_UpdateRect(screen, 0, 176, 640, 32);
+	  SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){0, 176, 640, 32}, 1);
 	}
       else if (i == 25)
 	{
 	  drawtext(192, 288, "PRESENTS");
-	  SDL_UpdateRect(screen, 0, 288, 640, 32);
+	  SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){0, 288, 640, 32}, 1);
 	}
       
       SDL_Delay(30);
@@ -2123,7 +2140,7 @@ int title(void)
     xm[NUM_TITLE_BALLOONS], ym[NUM_TITLE_BALLOONS],
     color[NUM_TITLE_BALLOONS], bumped[NUM_TITLE_BALLOONS];
   SDL_Rect src, dest;
-  SDLKey key;
+  SDL_Keycode key;
   
 
   /* Show mouse pointer: */
@@ -2134,7 +2151,7 @@ int title(void)
   /* Draw background: */
 
   SDL_BlitSurface(images[IMG_TITLE], NULL, screen, NULL);
-  SDL_Flip(screen);
+  SDL_UpdateWindowSurface(window);
   
   
   /* Reset highlight info: */
@@ -2655,7 +2672,7 @@ int title(void)
       
       /* Update the screen: */
       
-      SDL_Flip(screen);
+      SDL_UpdateWindowSurface(window);
       
       
       /* Keep playing music: */
@@ -2665,7 +2682,8 @@ int title(void)
 	{
 	  if (!Mix_PlayingMusic())
 	    {
-	      Mix_PlayMusic(mus_title, 0);
+	      // Music playing is disabled
+	      // Mix_PlayMusic(mus_title, 0);
 	      Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
 	    }
 	}
@@ -2695,14 +2713,20 @@ int title(void)
 /* Set video mode: */
 /* Mattias Engdegard <f91-men@nada.kth.se> */
 
-SDL_Surface * set_vid_mode(unsigned flags)
+SDL_Window* window = NULL;
+SDL_Renderer* renderer = NULL;
+
+SDL_Window* set_vid_mode(unsigned flags)
 {
-  /* Prefer 16bpp, but also prefer native modes to emulated 16bpp. */
+  /* Create window and renderer */
   
-  int depth;
+  if (SDL_CreateWindowAndRenderer(640, 480, flags, &window, &renderer) < 0) {
+    return NULL;
+  }
   
-  depth = SDL_VideoModeOK(640, 480, 16, flags);
-  return depth ? SDL_SetVideoMode(640, 480, depth, flags) : NULL;
+  SDL_SetWindowTitle(window, "Circus Linux!");
+  
+  return window;
 }
 
 
@@ -2824,32 +2848,38 @@ void setup(void)
 
   /* Open display: */
   
+  Uint32 flags = SDL_WINDOW_SHOWN;
   if (use_fullscreen == 1)
     {
-      screen = set_vid_mode(SDL_FULLSCREEN | SDL_HWSURFACE);
-      if (screen == NULL)
-        {
-          fprintf(stderr,
-                  "\nWarning: I could not set up fullscreen video for "
-                  "640x480 mode.\n"
-                  "The Simple DirectMedia error that occured was:\n"
-                  "%s\n\n", SDL_GetError());
-          use_fullscreen = 0;
-        }
+      flags |= SDL_WINDOW_FULLSCREEN;
     }
   
-  if (use_fullscreen == 0)
+#ifdef __EMSCRIPTEN__
+  if (SDL_CreateWindowAndRenderer(640, 480, flags, &window, &renderer) < 0)
+#else
+  window = set_vid_mode(flags);
+  if (window == NULL)
+#endif
     {
-      screen = set_vid_mode(0);
-      
-      if (screen == NULL)
-        {
-          fprintf(stderr,
-                  "\nError: I could not set up video for 640x480 mode.\n"
-                  "The Simple DirectMedia error that occured was:\n"
-                  "%s\n\n", SDL_GetError());
-          exit(1);
-        }
+      fprintf(stderr,
+              "\nError: I could not set up video for 640x480 mode.\n"
+              "The Simple DirectMedia error that occured was:\n"
+              "%s\n\n", SDL_GetError());
+      exit(1);
+    }
+  
+#ifdef __EMSCRIPTEN__
+  screen = SDL_CreateRGBSurface(0, 640, 480, 32, 0, 0, 0, 0);
+#else
+  screen = SDL_GetWindowSurface(window);
+#endif
+  if (screen == NULL)
+    {
+      fprintf(stderr,
+              "\nError: I could not create screen surface.\n"
+              "The Simple DirectMedia error that occured was:\n"
+              "%s\n\n", SDL_GetError());
+      exit(1);
     }
   
   
@@ -2860,7 +2890,7 @@ void setup(void)
   
   /* Set window manager stuff: */
   
-  SDL_WM_SetCaption("Circus Linux!", "Circus Linux!");
+  SDL_SetWindowTitle(window, "Circus Linux!");
   
   
   /* Load graphics: */
@@ -2884,19 +2914,9 @@ void setup(void)
       
       /* Set transparency: */
       
-      if (SDL_SetColorKey(image, (SDL_SRCCOLORKEY | SDL_RLEACCEL),
-                          SDL_MapRGB(image -> format,
-                                     0xFF, 0xFF, 0xFF)) == -1)
-        {
-          fprintf(stderr,
-                  "\nError: I could not set the color key for the file:\n"
-                  "%s\n"
-                  "The Simple DirectMedia error that occured was:\n"
-                  "%s\n\n", image_names[i], SDL_GetError());
-          exit(1);
-        }
+      SDL_SetColorKey(image, SDL_TRUE, SDL_MapRGB(image->format, 0xFF, 0xFF, 0xFF));
 
-      images[i] = SDL_DisplayFormat(image);
+      images[i] = SDL_ConvertSurface(image, screen->format, 0);
       if (images[i] == NULL)
         {
           fprintf(stderr,
@@ -2921,7 +2941,7 @@ void setup(void)
       col = (255 * i) / NUM_IMAGES;
       
       SDL_FillRect(screen, &dest, SDL_MapRGB(screen->format, col, col, col));
-      SDL_UpdateRect(screen, dest.x, dest.y, dest.w, dest.h);
+      SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){dest.x, dest.y, dest.w, dest.h}, 1);
       SDL_Delay(1);
     }
   
@@ -2946,72 +2966,7 @@ void setup(void)
         }
       
       
-      /* Load musics: */
-      
-      /* (title) */
-      
-      mus_title = Mix_LoadMUS(MUS_TITLE);
-      if (mus_title == NULL)
-	{
-	  fprintf(stderr,
-		  "\nError: I could not load the music file:\n"
-		  "%s\n"
-		  "The Simple DirectMedia error that occured was:\n"
-		  "%s\n\n", MUS_TITLE, SDL_GetError());
-	  exit(1);
-	}
-
-      /* (game) */
-      
-      mus_game = Mix_LoadMUS(MUS_GAME);
-      if (mus_game == NULL)
-	{
-	  fprintf(stderr,
-		  "\nError: I could not load the music file:\n"
-		  "%s\n"
-		  "The Simple DirectMedia error that occured was:\n"
-		  "%s\n\n", MUS_GAME, SDL_GetError());
-	  exit(1);
-	}
-
-      /* (gameover) */
-      
-      mus_gameover = Mix_LoadMUS(MUS_GAMEOVER);
-      if (mus_gameover == NULL)
-	{
-	  fprintf(stderr,
-		  "\nError: I could not load the music file:\n"
-		  "%s\n"
-		  "The Simple DirectMedia error that occured was:\n"
-		  "%s\n\n", MUS_GAMEOVER, SDL_GetError());
-	  exit(1);
-	}
-
-      /* (hiscore) */
-
-      mus_hiscore = Mix_LoadMUS(MUS_HISCORE);
-      if (mus_hiscore == NULL)
-	{
-	  fprintf(stderr,
-		  "\nError: I could not load the music file:\n"
-		  "%s\n"
-		  "The Simple DirectMedia error that occured was:\n"
-		  "%s\n\n", MUS_HISCORE, SDL_GetError());
-	  exit(1);
-	}
-
-      /* (hiscore screen) */
-
-      mus_hiscreen = Mix_LoadMUS(MUS_HISCORESCREEN);
-      if (mus_hiscreen == NULL)
-	{
-	  fprintf(stderr,
-		  "\nError: I could not load the music file:\n"
-		  "%s\n"
-		  "The Simple DirectMedia error that occured was:\n"
-		  "%s\n\n", MUS_HISCORESCREEN, SDL_GetError());
-	  exit(1);
-	}
+      /* Music loading is disabled due to incompatibility with Protracker mod format */
     }
 #endif
 
@@ -3019,7 +2974,7 @@ void setup(void)
   
   /* Seed random generator: */
   
-  srand(SDL_GetTicks());
+  srand((unsigned int)SDL_GetTicks());
 }
 
 
@@ -3049,8 +3004,8 @@ void draw(int x, int y, int pict)
   
   src.x = 0;
   src.y = 0;
-  src.w = images[pict] -> w;
-  src.h = images[pict] -> h;
+  src.w = images[pict]->w;
+  src.h = images[pict]->h;
   
   dest.x = x;
   dest.y = y;
@@ -3058,6 +3013,11 @@ void draw(int x, int y, int pict)
   dest.h = src.h;
   
   SDL_BlitSurface(images[pict], &src, screen, &dest);
+}
+
+void update_screen(void)
+{
+  SDL_UpdateWindowSurface(window);
 }
 
 
@@ -3379,7 +3339,7 @@ void seticon(void)
   
   /* Set icon: */
   
-  SDL_WM_SetIcon(icon, mask);
+  SDL_SetWindowIcon(window, icon);
   
   
   /* Free icon surface & mask: */
@@ -3406,11 +3366,11 @@ void usage(int ret)
 	  "  --disable-sound - Disable sound and music. (Also \"--nosound\" or \"-q\")\n"
 	  "  --fullscreen    - Display in full screen instead of a window, if possible.\n"
 	  "                    (Also \"-f\")\n"
-#ifdef JOY_YES
+#if defined(JOY_YES) && !defined(__EMSCRIPTEN__)
 	  "  --digital       - Joystick will be seen as a digital game pad, not analog.\n"
 	  "                    (Also \"-d\")\n"
 	  "  --paddle        - Joystick will be seen as a real Atari paddle.\n"
-          "                    (Also \"-p\")\n"
+	  "                    (Also \"-p\")\n"
 #endif
 	  "  --low           - Use less graphics to work on lower-end hardware.\n"
 	  "                    (Also \"-l\")\n"
@@ -3580,7 +3540,7 @@ int highscorescreen(void)
 	}
     }
   
-  SDL_UpdateRect(screen, 0, 0, 640, 480);
+  SDL_UpdateWindowSurface(window);
   
   
   /* Wait for input: */
@@ -3622,7 +3582,8 @@ int highscorescreen(void)
 	{
 	  if (!Mix_PlayingMusic())
 	    {
-	      Mix_PlayMusic(mus_hiscreen, 0);
+	      // Music playing is disabled
+	      // Mix_PlayMusic(mus_hiscreen, 0);
 	      Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
 	    }
 	}
@@ -3649,7 +3610,7 @@ int highscorescreen(void)
 int pausescreen(void)
 {
   SDL_Event event;
-  SDLKey key;
+  SDL_Keycode key;
   int done, quit;
   
   
@@ -3667,7 +3628,7 @@ int pausescreen(void)
   
   drawfuzz(224, 224, 192, 32);
   drawtext(224, 224, "PAUSED");
-  SDL_UpdateRect(screen, 224, 224, 192, 32);
+  SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){224, 224, 192, 32}, 1);
   
   
   /* Wait for keypress: */
@@ -3713,7 +3674,7 @@ int pausescreen(void)
   /* Erase message: */
   
   erase(224, 224, 192, 32, IMG_BACKGROUND_0);
-  SDL_UpdateRect(screen, 224, 224, 192, 32);
+  SDL_UpdateWindowSurfaceRects(window, &(SDL_Rect){224, 224, 192, 32}, 1);
 
 
   /* Unpause music: */
@@ -3738,7 +3699,7 @@ void getinitials(void)
 #ifdef LINUX
   struct passwd * pw;
 #endif
-  char * tmp;
+  // const char *tmp = NULL;
   
   
   /* Default to nothing: */
@@ -3793,4 +3754,27 @@ void getinitials(void)
 	}
     }
 #endif
+}
+void main_loop() {
+  static int done = 0;
+  
+  if (!done) {
+    show_highscores = 0;
+    done = title();
+    
+    if (!done) {
+      if (show_highscores == 0)
+        done = game();
+      else
+        done = highscorescreen();
+    }
+  }
+  
+  if (done) {
+#ifdef __EMSCRIPTEN__
+    emscripten_cancel_main_loop();
+#else
+    exit(0);
+#endif
+  }
 }
