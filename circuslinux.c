@@ -1783,14 +1783,12 @@ void game(void) {
 
 		/* Play game-over or high-score music: */
 
-
 		if (use_sound == 1) {
 			if (!Mix_PlayingMusic()) {
 				if (has_highscore == -1) {
-					// Music playing is disabled
-					// Mix_PlayMusic(mus_gameover, 0);
+					Mix_PlayMusic(mus_gameover, 0);
 				} else {
-					// Mix_PlayMusic(mus_hiscore, 0);
+					Mix_PlayMusic(mus_hiscore, 0);
 				}
 
 				Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
