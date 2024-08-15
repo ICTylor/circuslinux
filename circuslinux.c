@@ -69,7 +69,7 @@ typedef enum {
 #pragma region Config
 #define DATA_PREFIX "data/"
 #define VERSION "1.0.0"
-#define DISABLE_MUSIC
+// #define DISABLE_MUSIC
 #pragma endregion
 /* Image enumerations: */
 enum {
@@ -2296,21 +2296,22 @@ void title(void) {
 	if (use_sound == 1) {
 		if (!Mix_PlayingMusic()) {
 			// Music playing is disabled
-			// Mix_PlayMusic(mus_title, 0);
+			Mix_PlayMusic(mus_title, 0);
 			Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
 		}
 	}
 
+	if (status != STATE_TITLE) {
+		/* Play a pop noise: */
 
-	/* Play a pop noise: */
-
-	playsound(SND_POP);
+		playsound(SND_POP);
 
 
-	/* Stop title music: */
+		/* Stop title music: */
 
-	if (use_sound == 1) {
-		Mix_HaltMusic();
+		if (use_sound == 1) {
+			Mix_HaltMusic();
+		}
 	}
 }
 
@@ -2438,6 +2439,7 @@ void setup(void) {
 			        "%s\n\n", SDL_GetError());
 			use_sound = 0;
 		}
+		Mix_Init(MIX_INIT_MOD);
 	}
 
 
@@ -2545,7 +2547,73 @@ void setup(void) {
 		}
 
 
-		/* Music loading is disabled due to incompatibility with Protracker mod format */
+		/* Load musics: */
+
+		/* (title) */
+
+		mus_title = Mix_LoadMUS(MUS_TITLE);
+		if (mus_title == NULL)
+		{
+			fprintf(stderr,
+				"\nError: I could not load the music file:\n"
+				"%s\n"
+				"The Simple DirectMedia error that occured was:\n"
+				"%s\n\n", MUS_TITLE, SDL_GetError());
+			exit(1);
+		}
+
+		/* (game) */
+
+		mus_game = Mix_LoadMUS(MUS_GAME);
+		if (mus_game == NULL)
+		{
+			fprintf(stderr,
+				"\nError: I could not load the music file:\n"
+				"%s\n"
+				"The Simple DirectMedia error that occured was:\n"
+				"%s\n\n", MUS_GAME, SDL_GetError());
+			exit(1);
+		}
+
+		/* (gameover) */
+
+		mus_gameover = Mix_LoadMUS(MUS_GAMEOVER);
+		if (mus_gameover == NULL)
+		{
+			fprintf(stderr,
+				"\nError: I could not load the music file:\n"
+				"%s\n"
+				"The Simple DirectMedia error that occured was:\n"
+				"%s\n\n", MUS_GAMEOVER, SDL_GetError());
+			exit(1);
+		}
+
+		/* (hiscore) */
+
+		mus_hiscore = Mix_LoadMUS(MUS_HISCORE);
+		if (mus_hiscore == NULL)
+		{
+			fprintf(stderr,
+				"\nError: I could not load the music file:\n"
+				"%s\n"
+				"The Simple DirectMedia error that occured was:\n"
+				"%s\n\n", MUS_HISCORE, SDL_GetError());
+			exit(1);
+		}
+
+		/* (hiscore screen) */
+
+		mus_hiscreen = Mix_LoadMUS(MUS_HISCORESCREEN);
+		if (mus_hiscreen == NULL)
+		{
+			fprintf(stderr,
+				"\nError: I could not load the music file:\n"
+				"%s\n"
+				"The Simple DirectMedia error that occured was:\n"
+				"%s\n\n", MUS_HISCORESCREEN, SDL_GetError());
+			exit(1);
+		}
+
 	}
 
 
@@ -2979,8 +3047,7 @@ void highscorescreen(void) {
 		/* Keep playing music: */
 		if (use_sound == 1) {
 			if (!Mix_PlayingMusic()) {
-				// Music playing is disabled
-				// Mix_PlayMusic(mus_hiscreen, 0);
+				Mix_PlayMusic(mus_hiscreen, 0);
 				Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
 			}
 		}
