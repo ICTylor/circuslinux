@@ -2,7 +2,7 @@ name: "emsdk"
 on: workflow_dispatch
 
 env:
-  EM_VERSION: 3.1.65
+  EM_VERSION: 3.1.64
   EM_CACHE_FOLDER: 'emsdk-cache'
 
 jobs:
