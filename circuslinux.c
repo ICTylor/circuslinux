@@ -3063,9 +3063,11 @@ void highscorescreen(void) {
 			}
 		}
 	}
-	/* Stop music: */
-	if (use_sound == 1)
-		Mix_HaltMusic();
+	if (status != STATE_HIGHSCORES) {
+		/* Stop music: */
+		if (use_sound == 1)
+			Mix_HaltMusic();
+	}
 }
 
 /* Pause screen: */
