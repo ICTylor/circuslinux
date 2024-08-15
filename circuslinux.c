@@ -65,6 +65,7 @@ typedef enum {
 #include <SDL2/SDL_image.h>
 #include <SDL2/SDL_mixer.h>
 #include <emscripten.h>
+#include <emscripten/html5.h>
 #pragma endregion
 #pragma region Config
 #define DATA_PREFIX "data/"
@@ -2325,10 +2326,10 @@ SDL_Window *window = NULL;
 SDL_Renderer *renderer = NULL;
 
 SDL_Window *set_vid_mode(unsigned flags) {
-	unsigned rendererFlags = SDL_RENDERER_SOFTWARE;
+	unsigned rendererFlags = SDL_RENDERER_ACCELERATED;
 	/* Create window and renderer */
 	renderer = SDL_CreateRenderer(window, 0, rendererFlags);
-	window = SDL_CreateWindow("Circus Linux!", 0, 0, 640, 480, flags);
+	window = SDL_CreateWindow("Circus Linux!", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, flags);
 
 	if (window == NULL) {
 		return NULL;
@@ -2447,7 +2448,7 @@ void setup(void) {
 
 	/* Open display: */
 
-	Uint32 flags = SDL_WINDOW_SHOWN;
+	Uint32 flags = SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE;
 	if (use_fullscreen == 1) {
 		flags |= SDL_WINDOW_FULLSCREEN;
 	}
@@ -2481,6 +2482,14 @@ void setup(void) {
 	/* Set window manager stuff: */
 
 	SDL_SetWindowTitle(window, "Circus Linux!");
+
+	EM_ASM({
+		var canvas = Module.canvas;
+		if (canvas) {
+			canvas.style.width = "min(95vw, calc(95vh * (4/3)))";
+			canvas.style.height = "min(calc(95vw * (3/4)), 95vh)";
+		}
+	});
 
 
 	/* Load graphics: */
