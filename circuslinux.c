@@ -710,7 +710,6 @@ void game(void) {
 	Uint32 last_time, now_time;
 	SDL_Keycode key;
 	SDL_Rect dest;
-	// const Uint8 *keystate;
 	Sint16 axis;
 
 	/* --- MAIN GAME LOOP --- */
@@ -1563,9 +1562,16 @@ void game(void) {
 
 		/* Keep playing music: */
 
-		if (use_sound == 1) {
-			/* Music playing is disabled due to incompatibility with Protracker mod format */
+#ifndef NOSOUND
+		if (use_sound == 1)
+		{
+			if (!Mix_PlayingMusic())
+			{
+				Mix_PlayMusic(mus_game, 0);
+				Mix_VolumeMusic((music_vol * MIX_MAX_VOLUME) / 3);
+			}
 		}
+#endif
 	}
 
 
@@ -1887,6 +1893,12 @@ void initialize_title() {
 	}
 
 	highscore_effect = 0;
+	show_highscores = 0;
+
+	text_x = -640;
+	text_xm = 36;
+	text_img = 0;
+	text_time = 0;
 }
 
 void title(void) {
@@ -1896,14 +1908,6 @@ void title(void) {
 	SDL_Keycode key;
 
 	/* --- MAIN TITLE LOOP --- */
-
-	show_highscores = 0;
-
-	text_x = -640;
-	text_xm = 36;
-	text_img = 0;
-	text_time = 0;
-
 
 	last_time = SDL_GetTicks();
 
