@@ -1656,6 +1656,9 @@ void game(void) {
 
 		SDL_UpdateWindowSurface(window);
 		status = STATE_ASK_FOR_INITIALS;
+		if (use_sound == 1) {
+			Mix_HaltMusic();
+		}
 	}
 	/* Wait for something: */
 
@@ -1811,7 +1814,7 @@ void game(void) {
 
 	/* Silence music: */
 
-	if (status == STATE_INITIAL) {
+	if (status == STATE_INITIAL || status == STATE_HIGHSCORES) {
 		if (use_sound == 1)
 			Mix_HaltMusic();
 	}
