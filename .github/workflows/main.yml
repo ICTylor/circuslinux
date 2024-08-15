@@ -9,3 +9,5 @@ jobs:
 
       - name: Verify
         run: emcc -v
+      - name: Make release
+        run: make emscripten_release
