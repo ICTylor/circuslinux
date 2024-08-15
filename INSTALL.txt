@@ -1,0 +1,134 @@
+INSTALL.txt for Circus Linux!
+
+by Bill Kendrick
+bill@newbreedsoftware.com
+http://www.newbreedsoftware.com/circus-linux/
+
+Version 1.0.3
+
+April 28, 2001
+
+
+GENERAL REQUIREMENTS
+--------------------
+
+  CONTROLS
+  --------
+    The game is controlled using a mouse.  It can be played with either
+    a mouse, a joystick, a real Atari paddle, or the keyboard.
+
+    (Note: Joystick code requires version 1.1.x of Simple DirectMedia Layer
+    or higher.  The Windows release uses 1.0.8, which does not include
+    joystick support.  See FAQ.txt.)
+
+
+REQUIREMENTS TO COMPILE
+-----------------------
+  SDL
+  ---
+    "Circus Linux!" was programed using the "Simple Direct Media" layer
+    libraries by Sam Lantinga.  This means that the game can
+    theoretically run under any environment that the SDL libraries support.
+
+    (As of this program's release, this includes: Linux X11/DGA,
+    Win32 WinDIB/DirectX, BeOS BWindow, and Solaris X11, as well
+    as unofficually supported: Linux SVGAlib, IRIX 6.x X11,
+    FreeBSD 3.x X11, and MacOS.)
+
+    The Simple DirectMedia Layer is required to compile this game.
+
+    You can download the SDL libraries from:
+      http://www.devolution.com/~slouken/SDL/
+
+  SDL_image
+  ---------
+    SDL_image is also required.  (It is used to load the PNG format images
+    that come with Circus Linux!)
+
+    You can download SDL_image from:
+      http://www.devolution.com/~slouken/SDL/projects/SDL_image/
+
+  SDL_mixer
+  ---------
+    Sound and music are available, but are not required (see below).
+    You will need the "SDL_mixer" library compiled and installed if
+    you want sound.
+
+    You can download SDL_mixer from:
+      http://www.devolution.com/~slouken/SDL/projects/SDL_mixer/
+
+
+INSTALLING UNDER LINUX/UNIX
+---------------------------
+  First, run the configuration script, "./configure":
+
+    ./configure
+
+
+  To compile circuslinux with joystick support (required for playing the game
+  with either a PC joystick, or an Atari paddle connected to the PC's
+  joystick port), make sure you have a version of SDL that supports joystick
+  (1.1.2 and above).  When you run "./configure," do it like this:
+
+    ./configure --enable-joystick
+
+
+  Then compile the game:
+
+    make
+
+
+  Then (as super-user, if you're installing the game in the default
+  location of "/usr/") install the game:
+
+    make install
+
+  This should  put circuslinux and the data files in the right place.
+  The README.txt and friends go into /usr/doc/circuslinux-<version>/
+
+
+  In case you want to remove(!) circuslinux do a
+
+    make uninstall
+
+  from the source directory.
+  This should remove all circuslinux files safely.
+
+
+CROSS-COMPILING FOR WINDOWS UNDER LINUX
+---------------------------------------
+  Get an EGCS-based compiler for Win32, like the one available here:
+
+    http://www.devolution.com/~slouken/SDL/Xmingw32/
+
+  Follow the instructions in SDL's "README.Win32" file regarding compiling
+  and installing the Windows32 cross-compiled version of SDL.
+
+  Also, cross-compile SDL_mixer, SDL_image and the png libraries,
+  following similar instructions to above.  (Note: Set the "--prefix"
+  value when running "./configure" for these two libraries.)
+
+  Finally, in the circuslinux directory, run:
+
+    make -f Makefile-win32
+
+  This will build the ".exe" and copy the SDL ".dll" files into the
+  directory.
+
+  URL
+  ---
+    The "png" and "z" libraries are available at:
+
+      http://www.libpng.org/pub/png/pngcode.html
+
+
+ICON FILE
+---------
+  A 32x32, XPM-format icon file (using the standard 23-color "cmap.xpm"
+  color palette) is available if you wish to use an icon for this game.
+
+  The file is "circuslinux-icon.xpm", and installed in Circus Linux!'s
+  "data/images/" directory.
+
+
+The End!

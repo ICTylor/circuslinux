@@ -1,0 +1,211 @@
+CHANGES.txt for Circus Linux!
+
+by Bill Kendrick
+bill@newbreedsoftware.com
+http://www.newbreedsoftware.com/circus-linux/
+
+1.0.3 - April 28, 2001
+----------------------
+  * Added support for real Atari 2600 paddles (connected to the PC joystick
+    port).  Atari paddles are calibrated slightly different, and are also
+    reversed.  Thanks to Mark Kim for building the paddle adapter for me!
+
+1.0.2 - August 5, 2000
+----------------------
+  * You can now press the [G] key to toggle mouse-grabbing (that is,
+    whether the mouse pointer is trapped within the window or not).
+    Clement Bourdarias <cbour@cybercable.tm.fr>
+
+  * Audio is now opened at 44.1Khz (so it sounds better, and works better
+    under MacOS).
+    Darrell Walisser <dwaliss1@purdue.edu>
+
+  * MacOS version of 1.0.1 released (with above fix).
+    Darrell Walisser <dwaliss1@purdue.edu>
+
+1.0.1 - June 4, 2000
+--------------------
+  * Makefile.am tweaks: Documents now installed into "$(prefix)/share/doc/",
+    instead of "/usr/doc/";  Data file permissions set to 755. (Still no good!)
+    Martin Willemoes Hansen <mwh@stampede.org>
+
+1.0.0 - May 29, 2000
+--------------------
+  * Makefile.am and data/Makefile.am tweaks.
+    Vikram Subramanian <upender@vsnl.com>
+
+  * Game prefers 16-bit depth, but prefers native depth over
+    emulated 16-bit!
+    Mattias Engdegard <f91-men@nada.kth.se>
+
+  * Data file permissions set nicely for .tar.gz releases.
+
+  * Version number upgraded to '1.0.0' since everything seems pretty
+    much done!
+
+  * Added copying (GPL) information.  Run "circuslinux --copying"
+
+  * Usage display reorganized.  (Run "circuslinux --usage")
+
+
+0.0.8 - May 25, 2000
+--------------------
+  * Added keyboard control.  (LEFT/RIGHT and RETURN/ALT/SHIFT)
+
+  * Made mouse pointer invisible.
+
+  * Divided FAQ into "General Problems," and "Linux Problems."
+
+  * Divided Mouse, Joystick and Keyboard control descriptions in README.txt.
+
+  * Now calls "SDL_SetColorKey()" before "SDL_DisplayFormat()," so sprites
+    shouldn't appear broken at 8-bit color depth.
+
+  * Tweaked analog joystick code
+
+  * Initial Windows 32-bit release.  Makefile-win32 created with help from
+    Brian Hayward <hayward@slothmud.org>
+
+
+0.0.7 - May 23, 2000
+--------------------
+  * Title music has finally been made!  (It's called "Finally" :) )
+
+
+0.0.6 - May 22, 2000
+--------------------
+  * Updated configure.in to contain correct version number.
+
+  * Updated INSTALL.txt.
+
+
+0.0.5 - May 21, 2000
+--------------------
+  * Now uses SDL's accellerated RLE blitting for colorkeyed images.
+
+  * Added more information to the game description in README.txt.
+
+  * Used "pngcrush" to get better compression in the graphics files.
+
+  * A little piece of "W" was visible next to "X"'s in the text font.  Fixed.
+
+  * Music now gets paused, not stoped and restarted from the beginning, when
+    you pause the game.
+
+  * Added "./configure" script.
+    Vikram Subramanian <upender@vsnl.com>
+
+
+0.0.4 - April 11, 2000
+----------------------
+  Bugs Fixed
+  ----------
+    * --fullscreen switch was broken (used "if" instead of "else if"). Fixed.
+      Torbjorn Andersson <torbjorn@dev.eurotime.se>
+
+    * Joystick support is now a compile-time option (since the stable version
+      of SDL doesn't have joystick code yet... oops!)  Compile with "JOY=NO"
+      to disable joystick support.
+      Christian T. Steigies <cts@debian.org>
+
+    * Joystick setup code checked Axes a 2nd time instead of buttons.  Fixed.
+
+
+0.0.3 - April 9, 2000
+----------------------
+  New Features Added
+  ------------------
+    * Clowns now launch a little higher (more realistically) from the
+      teeter-totter.
+
+    * Added note to use "--usage" for command-line options in "--help" display.
+
+    * Added more variations of command line options:
+      "--nosound" and "-q" are the same as "--disable-sound",
+      "-l" is the same as "--low", and
+      "-f" is the same as "--fullscreen".
+
+    * Added game over screen music.
+      Jarkko Rotsten <roz@sci.fi>
+
+    * Changed "sdlconfig --libs" to "sdlconfig --static-libs" in Makefile,
+      so that it will build better under m68k Linux.
+      Roman Hodek <Roman.Hodek@informatik.uni-erlangen.de>
+
+    * Tweaked arguments used in Mix_OpenAudio() call to make audio sound
+      better on slower machines.
+
+    * BMP files converted to PNG files to save space.  SDL_Image library
+      now required.
+
+    * Joystick code added (analog and digital supported).
+
+    * Added an FAQ document.
+
+
+0.0.2 - March 12, 2000
+----------------------
+  Planned Features Implemented
+  ----------------------------
+    * High scores screen now has music.
+
+    * Seal circus act completed.
+
+    * Bear circus act added.
+
+  New Features Added
+  ------------------
+    * [TAB], [SPACE] or [P] now pauses/unpauses during the game.
+
+    * Added an 32x32 XPM icon file: "circuslinux-icon.xpm"
+      Christian T. Steigies <cts@debian.org>
+
+    * Balloons flash colors when high score is acheived.
+
+    * Command-line options described in usage display.
+
+    * "--low" option added.  Less flashy display will be used so there's
+      a better chance it can run on low-end hardware.
+
+    * If you don't fill out your initials when you get a high score, it
+      will try to figure it out based on your real name or username (Linux).
+
+    * Text bitmap looks nicer.
+
+  Bugs Fixed
+  ----------
+    * "nosound" target builds correctly now.
+      Chris Ellec <info@linuxforkids.com>
+
+    * Balloons now reappear at the right time (on the flying clown's way
+      down) in clear-all mode.
+
+0.0.1 - February 9, 2000
+------------------------
+  Planned Features Implemented
+  ----------------------------
+    * "Clear all" mode.
+
+    * High scores.
+
+    * Options file.
+
+  New Features Added
+  ------------------
+    * [ESCAPE] on title screen can be used to exit.
+
+    * Added percentage bar while loading.
+
+  Bugs Fixed
+  ----------
+    * Flying-clown / balloon collision detection.
+
+    * Teeter-totter bounciness made even.
+
+    * Crashes when volumes set when audio not available fixed.
+      Gabriel Rosa <mr_gab@hotmail.com>
+
+
+INITIAL RELEASE 0.0.0 - February 5, 2000
+----------------------------------------
+  * Initial alpha release.

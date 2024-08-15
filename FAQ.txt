@@ -1,0 +1,190 @@
+FAQ.txt for Circus Linux!
+
+by Bill Kendrick
+bill@newbreedsoftware.com
+http://www.newbreedsoftware.com/circus-linux/
+
+Version 1.0.3
+
+April 28, 2001
+
+
+GENERAL PROBLEMS:
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+I want the mouse pointer to stay within the window.
+
+  SOLUTION:
+  During the game, press the [G] key to turn mouse-grabbing on.
+  (You can press it again to turn it off.)
+
+----------------------------------------------------------------------------
+
+PROBLEM:
+My mouse is gone!
+
+  CAUSE:
+  "Mouse-grabbing" is on.  The mouse pointer (which, by the way, is
+  invisible) cannot be removed from the window.
+
+  SOLUTION:
+  Press the [G] key to turn mouse-grabbing back off.
+  (You can press it again to turn it back on, if you like).
+
+----------------------------------------------------------------------------
+
+PROBLEM:
+When using a joystick, the teeter-totter jumps between the left, middle and
+right positions, instead of moving smoothly.
+
+  CAUSE:
+  This is because your joystick is digital.  It only has a left, right and
+  middle position.
+
+    SOLUTION:
+    Use the "--digital" option when you start the program.
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+When using real Atari paddles, the teeter-totter moves the opposite direction
+and doesn't go all the way to the edges.
+
+  CAUSE:
+  Atari 2600 paddles are calibrated differently.
+
+    SOLUTION:
+    Use the "--paddle" option when you start th eprogram.
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+The game is very slow on my computer.
+
+  CAUSE:
+  Your computer is probably not very fast, or you have a slow video card.
+
+    SOLUTION:
+    Use the "--low" option when you start the program.
+
+    SOLUTION:
+    Try using a different color depth.  16bpp is better (faster) than 24bpp,
+    for example.
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+There's no sound or music.
+
+  CAUSE:
+  Your computer doesn't have a sound card, or it's misconfigured.
+
+    SOLUTION:
+    Get a sound card and make sure it's configured.
+
+  CAUSE:
+  Another program is using your sound device.
+
+    SOLUTION:
+    Quit that program.
+
+  CAUSE:
+  You ran the program with the "--disable-sound" or "--nosound" or "-q" option.
+
+    SOLUTION:
+    Quit Circus Linux! and start it again without any sound-disabling option.
+
+  CAUSE:
+  The volume settings are set to "off".
+
+    SOLUTION:
+    Click the "SFX" and "MUSIC" options on Circus Linux!'s title screen until
+    the volume of the sound effects and music are at suitable volumes.
+
+  CAUSE:
+  The game is paused.
+
+    SOLUTION:
+    Press the [SPACE] key.
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+The clowns bounce back down when they hit balloons.
+
+  CAUSE:
+  The "Bouncy Balloons" game option is set.
+
+    SOLUTION:
+    Click the "Bouncy Balloons" option on the title screen so that the
+    option is no longer set.
+
+-----------------------------------------------------------------------------
+
+
+WINDOWS PROBLEMS:
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+My joystick doesn't work!
+
+  CAUSE:
+  The current version of Circus Linux! uses a stable version of the
+  Simple DirectMedia Layer library.  That version does not include
+  joystick support.
+
+    SOLUTION:
+    Wait for a newer release of Circus Linux!, after SDL jumps to 1.2.x.
+    (See: http://www.devolution.com/~slouken/SDL/ )
+
+
+-----------------------------------------------------------------------------
+
+
+LINUX PROBLEMS:
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+My joystick doesn't work!
+
+  CAUSE:
+  Is your joystick plugged-in and configured to work right?
+
+    SOLUTION:
+    Make sure your joystick is plugged in and configured (see your Linux
+    distribution's manual).
+
+  CAUSE:
+  Circus Linux! wasn't compiled to play with a joystick.
+
+    SOLUTION:
+    Run "make distclean" and then make sure you use the
+    "--enable-joystick" option when you run "./configure" (see INSTALL.txt)
+
+-----------------------------------------------------------------------------
+
+PROBLEM:
+When compiling, there's an error about SDL_JOYAXISMOTION not being defined.
+
+  CAUSE:
+  The version of SDL you have does not support joysticks.
+
+    SOLUTION:
+    Run "make distclean" and then make sure you _don't_ use the
+    "--enable-joystick" option when you run "./configure" (see INSTALL.txt)
+
+    SOLUTION:
+    Get SDL version 1.1.2 or higher, which supports joystick.
+
+-----------------------------------------------------------------------------
+
+If you have a question you think would be suitable for this FAQ, please
+e-mail me:
+
+  bill@newbreedsoftware.com
+
+Thank you!

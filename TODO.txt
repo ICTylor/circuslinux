@@ -1,0 +1,14 @@
+TODO.txt for Circus Linux!
+
+by Bill Kendrick
+bill@newbreedsoftware.com
+http://www.newbreedsoftware.com/circus-linux/
+
+Version 1.0.3
+
+April 28, 2001
+
+
+TODO
+----
+  When using paddles, let player two use the 2nd paddle controller.

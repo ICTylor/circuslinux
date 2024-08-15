@@ -1,0 +1,35 @@
+AUTHORS.txt for Circus Linux!
+
+by Bill Kendrick
+bill@newbreedsoftware.com
+http://www.newbreedsoftware.com/circus-linux/
+
+Version 1.0.3
+
+April 28, 2001
+
+
+CREDITS
+-------
+  Game Software:      Bill Kendrick, <bill@newbreedsoftware.com>
+                      http://www.newbreedsoftware.com/bill/
+
+  Original Concept:   "Circus Atari," (c) 1980 Atari, Inc.
+
+  Graphics:           Bill Kendrick, using The GIMP
+                      http://www.gimp.org/
+
+  Game background:    Manu Parssinen <man@sci.fi>
+                      http://www.sci.fi/~man
+
+  Title background:   Circus Arts Home Page
+                      Peter Bendall <bendall@altavista.net>
+                      http://members.aol.com/CircusGrp/parlari.html
+
+  Sound Effects:      Royalty free sound effects CDROMs and FTP sites.
+
+  Music:              "Klovnin Arki," "Hi Score," "Best-In" and "Finally"
+                      by Jarkko Rotsten <roz@sci.fi>
+                      http://www.sci.fi/~roz/
+
+  Miscellaneous:      See CHANGES.txt for bug fixers, etc.
