@@ -6,7 +6,7 @@ env:
   EM_CACHE_FOLDER: 'emsdk-cache'
 
 jobs:
-  test:
+  deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,3 +22,27 @@ jobs:
           actions-cache-folder: ${{env.EM_CACHE_FOLDER}}
       - name: Make release
         run: make emscripten_release
+
+      - name: Create artifact directory
+        run: mkdir dist
+
+      - name: Copy files to artifact directory
+        run: |
+          # Replace this list with your actual filenames
+          cp circuslinux.html dist/
+          cp circuslinux.data dist/
+          cp circuslinux.js dist/
+          cp circuslinux.wasm dist/
+
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: dist  # The directory containing your site files
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Output deployment URL
+        run: echo "Deployed to ${{ steps.deployment.outputs.page_url }}"
+
