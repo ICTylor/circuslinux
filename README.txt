@@ -1,3 +1,8 @@
+Emscripten port of "Circus Linux!". I am NOT the original author of the game, only the port. 
+Part of the port code was written by LLM. There might be some bugs, but it seems playable.
+
+ORIGINAL README BELOW:
+
 README.txt for Circus Linux!
 
 by Bill Kendrick
