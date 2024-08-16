@@ -5,6 +5,11 @@ env:
   EM_VERSION: 3.1.64
   EM_CACHE_FOLDER: 'emsdk-cache'
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
